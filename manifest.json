@@ -2,7 +2,7 @@
   "name": "Book Search",
   "short_name": "BookSearch",
   "description": "ISBN、タイトル、作者で本を検索",
-  "start_url": "/bs-pwa/BookSearch.html",
+  "start_url": "/bs-pwa/",
   "display": "standalone",
   "background_color": "#f9f9f9",
   "theme_color": "#f9f9f9",
