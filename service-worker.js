@@ -1,4 +1,4 @@
-const CACHE_NAME = 'book-search-v1';
+const CACHE_NAME = 'book-search-v2';
 const urlsToCache = [
   '/bs-pwa/', // ルートパスを追加
   '/bs-pwa/index.html', // BookSearch.htmlからindex.htmlに変更
