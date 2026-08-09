@@ -30,6 +30,47 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
+self.addEventListener('message', (event) => {
+  if (event.data?.type !== 'UPDATE_DATA') {
+    return;
+  }
+
+  const replyPort = event.ports[0];
+  const dataUrl = new URL('BaseData.csv', self.registration.scope).toString();
+
+  fetch(dataUrl, { cache: 'no-store' })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('CSV update failed');
+      }
+
+      return response.text().then(text => ({
+        response,
+        text
+      }));
+    })
+    .then(({ response, text }) => {
+      return caches.open(CACHE_NAME).then(cache => {
+        cache.put(dataUrl, new Response(text, {
+          headers: {
+            'Content-Type': 'text/csv; charset=utf-8'
+          }
+        }));
+
+        replyPort.postMessage({
+          ok: true,
+          text
+        });
+      });
+    })
+    .catch(error => {
+      console.error('CSV update failed:', error);
+      replyPort.postMessage({
+        ok: false
+      });
+    });
+});
+
 self.addEventListener('activate', (event) => {
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
