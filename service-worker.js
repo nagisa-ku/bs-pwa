@@ -1,8 +1,10 @@
-const CACHE_NAME = 'book-search-v3';
+const CACHE_NAME = 'book-search-v4';
 const APP_ROOT = self.registration.scope;
 const urlsToCache = [
   APP_ROOT,
   new URL('index.html', APP_ROOT).toString(),
+  new URL('styles.css', APP_ROOT).toString(),
+  new URL('app.js', APP_ROOT).toString(),
   new URL('manifest.json', APP_ROOT).toString(),
   new URL('BaseData.csv', APP_ROOT).toString(),
   new URL('icon-192x192.png', APP_ROOT).toString(),
