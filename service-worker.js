@@ -1,11 +1,12 @@
-const CACHE_NAME = 'book-search-v2';
+const CACHE_NAME = 'book-search-v3';
+const APP_ROOT = self.registration.scope;
 const urlsToCache = [
-  '/bs-pwa/', // ルートパスを追加
-  '/bs-pwa/index.html', // BookSearch.htmlからindex.htmlに変更
-  '/bs-pwa/manifest.json',
-  '/bs-pwa/BaseData.csv',
-  '/bs-pwa/icon-192x192.png',
-  '/bs-pwa/icon-512x512.png'
+  APP_ROOT,
+  new URL('index.html', APP_ROOT).toString(),
+  new URL('manifest.json', APP_ROOT).toString(),
+  new URL('BaseData.csv', APP_ROOT).toString(),
+  new URL('icon-192x192.png', APP_ROOT).toString(),
+  new URL('icon-512x512.png', APP_ROOT).toString()
 ];
 
 self.addEventListener('install', (event) => {
