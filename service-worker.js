@@ -1,11 +1,12 @@
-const CACHE_NAME = 'book-search-v1';
+const CACHE_NAME = 'book-search-v3';
+const APP_ROOT = self.registration.scope;
 const urlsToCache = [
-  '/bs-pwa/', // ルートパスを追加
-  '/bs-pwa/index.html', // BookSearch.htmlからindex.htmlに変更
-  '/bs-pwa/manifest.json',
-  '/bs-pwa/BaseData.csv',
-  '/bs-pwa/icon-192x192.png',
-  '/bs-pwa/icon-512x512.png'
+  APP_ROOT,
+  new URL('index.html', APP_ROOT).toString(),
+  new URL('manifest.json', APP_ROOT).toString(),
+  new URL('BaseData.csv', APP_ROOT).toString(),
+  new URL('icon-192x192.png', APP_ROOT).toString(),
+  new URL('icon-512x512.png', APP_ROOT).toString()
 ];
 
 self.addEventListener('install', (event) => {
@@ -28,6 +29,47 @@ self.addEventListener('fetch', (event) => {
         return fetch(event.request);
       })
   );
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data?.type !== 'UPDATE_DATA') {
+    return;
+  }
+
+  const replyPort = event.ports[0];
+  const dataUrl = new URL('BaseData.csv', self.registration.scope).toString();
+
+  fetch(dataUrl, { cache: 'no-store' })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('CSV update failed');
+      }
+
+      return response.text().then(text => ({
+        response,
+        text
+      }));
+    })
+    .then(({ response, text }) => {
+      return caches.open(CACHE_NAME).then(cache => {
+        cache.put(dataUrl, new Response(text, {
+          headers: {
+            'Content-Type': 'text/csv; charset=utf-8'
+          }
+        }));
+
+        replyPort.postMessage({
+          ok: true,
+          text
+        });
+      });
+    })
+    .catch(error => {
+      console.error('CSV update failed:', error);
+      replyPort.postMessage({
+        ok: false
+      });
+    });
 });
 
 self.addEventListener('activate', (event) => {

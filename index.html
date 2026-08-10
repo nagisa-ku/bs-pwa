@@ -8,7 +8,7 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('service-worker.js')
+        navigator.serviceWorker.register('./service-worker.js')
           .then(registration => {
             console.log('Service Worker registered: ', registration);
           })
@@ -81,6 +81,8 @@
   <h1>Book Search</h1>
   <input type="file" id="csvFile" accept=".csv" />
   <input type="text" id="search" placeholder="ISBN、タイトル、作者で検索" />
+  <button id="updateData">データを更新</button>
+  <span id="updateStatus"></span>
   <table id="results">
     <colgroup>
       <col class="title" />
@@ -180,6 +182,33 @@
         });
     }
 
+    function refreshCSV() {
+    const status = document.getElementById('updateStatus');
+    status.textContent = '更新中...';
+
+    const channel = new MessageChannel();
+
+    channel.port1.onmessage = function(event) {
+      if (event.data.ok) {
+        processCsvText(event.data.text);
+        status.textContent = 'データを更新しました';
+      } else {
+        status.textContent = '更新できませんでした。保存済みデータを使用します';
+      }
+    };
+
+    if (navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage(
+        { type: 'UPDATE_DATA' },
+        [channel.port2]
+      );
+    } else {
+      status.textContent = 'Service Workerが準備中です';
+    }
+  }
+
+    document.getElementById('updateData').addEventListener('click', refreshCSV);
+
     document.getElementById('csvFile').addEventListener('change', function(e) {
       const file = e.target.files[0];
       if (file) {
@@ -202,7 +231,7 @@
     });
 
     window.addEventListener('DOMContentLoaded', () => {
-      loadCSV('BaseData.csv');
+      loadCSV('./BaseData.csv');
     });
   </script>
 </body>
